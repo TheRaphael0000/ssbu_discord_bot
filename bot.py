@@ -1,8 +1,10 @@
-# bot.py
+#!/usr/bin/env python
 import os
+import re
 
 import discord
 from dotenv import load_dotenv
+
 from round_robin import round_robin, create_text
 
 load_dotenv()
@@ -18,29 +20,37 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    # Safety first, avoid recursive calls
     if message.author == client.user:
         return
+
     # Look up for message related to the bot
-    words = message.content.split(" ")
+    words = re.split(r"\s+", message.content)
     if words[0] != "!robin":
         return
 
     players = words[1:]
 
-    # Lower-bound
-    if len(players) <= 1:
-        await message.channel.send("*Create a round-robin tournament for the given players (space separated)\nSyntax : !robin p1 p2 ... p8*\nhttps://github.com/TheRaphael0000/round_robin_discord_bot")
+    n = len(players)
+
+    if n <= 0:
+        msg = """:
+>>> **Create a round-robin tournament for 2 to 8 players**
+*Syntax : !robin Player1 Player2 ... Player8*
+GitHub: https://github.com/TheRaphael0000/round_robin_discord_bot
+"""
+        await message.channel.send(msg)
         return
 
     # Upper-bound
-    if len(players) >= 8:
-        await message.channel.send("*Please specify 8 or less players*")
+    if n > 8 or n < 2:
+        await message.channel.send("*Please specify between 2 and 8 players*")
         return
 
     # Create round robin
     r = round_robin(players)
     # Create text message
-    t = create_text(r)
+    t = create_text(n, r)
 
     # Send it
     await message.channel.send(t)
