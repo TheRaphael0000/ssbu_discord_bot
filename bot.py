@@ -29,7 +29,7 @@ async def on_message(message):
 
     # Lower-bound
     if len(players) <= 1:
-        await message.channel.send("*Create a round-robin tournament for the given players (space separated); Syntax : !robin p1 p2 ... p8*")
+        await message.channel.send("*Create a round-robin tournament for the given players (space separated)\nSyntax : !robin p1 p2 ... p8*\nhttps://github.com/TheRaphael0000/round_robin_discord_bot")
         return
 
     # Upper-bound
