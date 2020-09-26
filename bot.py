@@ -2,41 +2,43 @@
 
 import os
 import re
+import systemd.daemon
 
 import discord
 from dotenv import load_dotenv
 
-from commands.ssbu import ssbu
-from commands.robin import robin
-from commands.bravery import bravery
-
-load_dotenv()
-token = os.getenv('DISCORD_TOKEN')
-
-client = discord.Client()
+import commands
 
 
-@client.event
-async def on_ready():
-    print(f'{client.user} ready')
+class SSBU(discord.Client):
+    async def on_ready(self):
+        systemd.daemon.notify("READY=1")
+        print(f"{self.user} ready")
+
+    async def on_message(self, message):
+        # Safety first, avoid recursive calls
+        if message.author == self.user:
+            return
+
+        # Look up for message related to the bot
+        words = re.split(r"\s+", message.content)
+
+        cmds = {
+            "!ssbu": commands.ssbu,
+            "!robin": commands.robin,
+            "!bravery": commands.bravery,
+        }
+
+        if words[0] in cmds.keys():
+            await cmds[words[0]](message, words)
 
 
-@client.event
-async def on_message(message):
-    # Safety first, avoid recursive calls
-    if message.author == client.user:
-        return
+def main():
+    load_dotenv()
+    token = os.getenv("DISCORD_TOKEN")
+    bot = SSBU()
+    bot.run(token)
 
-    # Look up for message related to the bot
-    words = re.split(r"\s+", message.content)
 
-    commands = {
-        "!ssbu": ssbu,
-        "!robin": robin,
-        "!bravery": bravery,
-    }
-
-    if words[0] in commands.keys():
-        await commands[words[0]](message, words)
-
-client.run(token)
+if __name__ == "__main__":
+    main()

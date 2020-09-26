@@ -1,0 +1,14 @@
+[Unit]
+Description=SSBU Discord Bot
+After=network.target
+
+[Service]
+Environment=PYTHONUNBUFFERED=1
+Type=notify
+User=ssbu_discord_bot
+WorkingDirectory=/opt/ssbu_discord_bot
+ExecStart=/usr/bin/python /opt/ssbu_discord_bot/bot.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
