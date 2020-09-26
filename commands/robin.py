@@ -1,3 +1,30 @@
+#!/usr/bin/env python
+
+help_msg = """:
+>>> **Create a round-robin tournament for 2 to 8 players**
+*Syntax : !robin Player1 Player2 ... Player8*
+"""
+
+
+async def robin(message, words):
+    """Handling the command !robin"""
+    players = words[1:]
+
+    n = len(players)
+
+    # Upper-bound
+    if n > 8 or n < 2:
+        return await message.channel.send(help_msg)
+
+    # Create round robin
+    r = round_robin(players)
+    # Create text message
+    t = create_text(n, r)
+
+    # Send it
+    return await message.channel.send(t)
+
+
 def round_robin(l):
     """Round-robin tournament algorithm"""
     o = []
