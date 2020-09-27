@@ -10,10 +10,22 @@ from dotenv import load_dotenv
 import commands
 
 
-class SSBU(discord.Client):
+class SSBUActivity(discord.Activity):
+    def __init__(self, nb_guilds):
+        super().__init__(
+            name=f"Super Smash Bros. Ultimate (on {nb_guilds} servers)",
+            type=discord.ActivityType.playing
+        )
+
+
+class SSBUBot(discord.Client):
     async def on_ready(self):
+        nb_guilds = len(self.guilds)
+        game = SSBUActivity(nb_guilds)
+        status = discord.Status.online
+        await self.change_presence(activity=game, status=status)
+        print(f"{self.user} ready, connected on {nb_guilds} servers")
         systemd.daemon.notify("READY=1")
-        print(f"{self.user} ready")
 
     async def on_message(self, message):
         # Safety first, avoid recursive calls
@@ -36,8 +48,11 @@ class SSBU(discord.Client):
 def main():
     load_dotenv()
     token = os.getenv("DISCORD_TOKEN")
-    bot = SSBU()
-    bot.run(token)
+    bot = SSBUBot()
+    try:
+        bot.run(token)
+    except:
+        bot.close()
 
 
 if __name__ == "__main__":
