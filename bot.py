@@ -41,7 +41,7 @@ class SSBUBot(discord.Client):
             "!bravery": commands.bravery,
         }
 
-        if words[0] in cmds.keys():
+        if words[0] in cmds:
             await cmds[words[0]](message, words)
 
 
