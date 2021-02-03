@@ -2,7 +2,12 @@
 
 import os
 import re
-import systemd.daemon
+
+try:
+    import systemd.daemon
+except ModuleNotFoundError:
+    # for windows
+    pass
 
 import discord
 from dotenv import load_dotenv
@@ -25,7 +30,11 @@ class SSBUBot(discord.Client):
         status = discord.Status.online
         await self.change_presence(activity=game, status=status)
         print(f"{self.user} ready, connected on {nb_guilds} servers")
-        systemd.daemon.notify("READY=1")
+        try:
+            systemd.daemon.notify("READY=1")
+        except NameError:
+            # for windows
+            pass
 
     async def on_message(self, message):
         # Safety first, avoid recursive calls

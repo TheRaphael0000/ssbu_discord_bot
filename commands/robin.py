@@ -8,9 +8,13 @@ help_msg = """:
 
 async def robin(message, words):
     """Handling the command !robin"""
-    players = words[1:]
+    if len(words) == 1:
+        players = fetch_players_from_voice_channel(message)
+    else:
+        players = words[1:]
 
     n = len(players)
+    print(players)
 
     # Upper-bound
     if n > 8 or n < 2:
@@ -23,6 +27,22 @@ async def robin(message, words):
 
     # Send it
     return await message.channel.send(t)
+
+
+def fetch_players_from_voice_channel(message):
+    author = message.author
+    if author is None:
+        return []
+
+    voice_state = author.voice
+    if voice_state is None:
+        return []
+
+    voice_channel = voice_state.channel
+    if voice_channel is None:
+        return []
+
+    return [m.display_name for m in voice_channel.members]
 
 
 def round_robin(l):
