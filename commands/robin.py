@@ -1,24 +1,26 @@
 #!/usr/bin/env python
 
-help_msg = """:
->>> **Create a round-robin tournament for 2 to 8 players**
-*Syntax : !robin Player1 Player2 ... Player8*
+help_msg = """
+>>> **Create a round-robin tournament for 2 to 8 players.**
+*!robin : Using names in the current voice channel.*
+*!robin Player1 ... Player8 : Using provided names.*
+**{}**
 """
 
 
 async def robin(message, words):
     """Handling the command !robin"""
-    if len(words) == 1:
+    if len(words) <= 1:
         players = fetch_players_from_voice_channel(message)
     else:
         players = words[1:]
 
     n = len(players)
-    print(players)
 
-    # Upper-bound
-    if n > 8 or n < 2:
-        return await message.channel.send(help_msg)
+    if n < 2 or n > 8:
+        msg = help_msg.format(
+            f"Error ! {n} player{'s' if n > 1 else ''} provided!")
+        return await message.channel.send(msg)
 
     # Create round robin
     r = round_robin(players)
@@ -30,19 +32,12 @@ async def robin(message, words):
 
 
 def fetch_players_from_voice_channel(message):
-    author = message.author
-    if author is None:
-        return []
-
-    voice_state = author.voice
+    """Return the names of the users in send voice channel"""
+    voice_state = message.author.voice
     if voice_state is None:
         return []
 
-    voice_channel = voice_state.channel
-    if voice_channel is None:
-        return []
-
-    return [m.display_name for m in voice_channel.members]
+    return [m.display_name for m in voice_state.channel.members]
 
 
 def round_robin(l):
