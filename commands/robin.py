@@ -4,26 +4,28 @@ help_msg = """
 >>> **Create a round-robin tournament for 2 to 8 players.**
 *!robin : Using names in the current voice channel.*
 *!robin Player1 ... Player8 : Using provided names.*
-**{}**
 """
 
 
 async def robin(message, words):
     """Handling the command !robin"""
+    author = message.author.display_name
     if len(words) <= 1:
-        players = fetch_players_from_voice_channel(message)
+        voice_channel, members = fetch_players_from_voice_channel(message)
+
+        if voice_channel is None:
+            msg = f"Error : You are not in a voice channel."
+            return await message.channel.send(help_msg + msg)
     else:
-        players = words[1:]
+        members = words[1:]
 
-    n = len(players)
-
+    n = len(members)
     if n < 2 or n > 8:
-        msg = help_msg.format(
-            f"Error ! {n} player{'s' if n > 1 else ''} provided!")
-        return await message.channel.send(msg)
+        msg = f"Error : {n} player{'s' if n > 1 else ''} provided."
+        return await message.channel.send(help_msg + msg)
 
     # Create round robin
-    r = round_robin(players)
+    r = round_robin(members)
     # Create text message
     t = create_text(n, r)
 
@@ -33,11 +35,12 @@ async def robin(message, words):
 
 def fetch_players_from_voice_channel(message):
     """Return the names of the users in send voice channel"""
-    voice_state = message.author.voice
+    author = message.author
+    voice_state = author.voice
     if voice_state is None:
-        return []
-
-    return [m.display_name for m in voice_state.channel.members]
+        return None, []
+    channel = voice_state.channel
+    return channel, [m.display_name for m in channel.members]
 
 
 def round_robin(l):
