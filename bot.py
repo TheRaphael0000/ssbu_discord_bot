@@ -24,6 +24,10 @@ class SSBUActivity(discord.Activity):
 
 
 class SSBUBot(discord.Client):
+
+    def __init__(self, intents):
+        super().__init__(intents=intents)
+
     async def on_ready(self):
         nb_guilds = len(self.guilds)
         game = SSBUActivity(nb_guilds)
@@ -55,9 +59,11 @@ class SSBUBot(discord.Client):
 
 
 def main():
+    intents = discord.Intents.default()
+    intents.members = True
     load_dotenv()
     token = os.getenv("DISCORD_TOKEN")
-    bot = SSBUBot()
+    bot = SSBUBot(intents)
     try:
         bot.run(token)
     except:
